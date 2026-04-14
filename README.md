@@ -1,7 +1,8 @@
 # 🚀 Desafio Final - Empower 5.0  - Em construção
 
-### Este projeto foi desenvolvido a partir do desafio sobre enchentes no Brasil. Ao analisar o cenário, identifiquei a dificuldade relacionada a Falta de Informação sobre Abrigos, o que motivou a criação desta solução.
+#### Este projeto foi desenvolvido a partir de um desafio sobre enchentes no Brasil. Ao analisar o cenário, identifiquei a dificuldade relacionada à falta de informação sobre abrigos, o que motivou a criação desta solução. Tendo em vista que a organização dos abrigos agiliza tanto a localização de pessoas desaparecidas quanto o esforço voluntário e as doações, este projeto tem como pilar a organização das informações e a promoção de maior agilidade na gestão de vagas em abrigos.
 
+---
 
 ## 🚀 Tecnologias Utilizadas
 
@@ -38,6 +39,8 @@
     />
 </p>
 
+---
+
 ## ▶️ Como Rodar o Projeto
 
 Siga os passos abaixo para rodar a aplicação localmente:
@@ -67,6 +70,30 @@ Siga os passos abaixo para rodar a aplicação localmente:
    npm run dev
    **Servidor rodando na porta http:localhost:3000
    ```
+---
+
+## ⚙️ Estrutura do Projeto
+
+📁 DESAFIOFINALFULLSTACK
+
+┣ 📁 .vscode
+
+┣ 📁 node_modules
+
+┣ 📄 .gitignore
+
+┣ 📄 database.db
+
+┣ 📄 database.js
+
+┣ 📄 package-lock.json
+
+┣ 📄 package.json
+
+┗ 📄 server.js
+
+---
+
 
 ## 🗄️ Banco de Dados
 
@@ -88,6 +115,7 @@ abrigos.db
 | aceita_pet       | Verifica se abrigo aceita pet |
 | aceita_doacoes   | Verifica se abrigo aceita doações|
 
+---
 
 ## 🔗 Endpoints
 
@@ -119,6 +147,20 @@ Ex: <code>/abrigos/1</code>
 POST /abrigo
 ```
 
+#### Body (JSON)
+
+```json
+{
+    "nome_abrigo": "Escola Municipal Esperança",
+    "endereco_abrigo": "Rua das Flores, 123 - Centro",
+    "capacidade_total": 35,
+    "vagas_disponiveis": 0,
+    "aceita_pet": "1",
+    "aceita_doacoes": "alimentos, água"
+}
+```
+
+
 ### ✏️ Atualizar cadastro de abrigo
 
 ```
@@ -130,11 +172,13 @@ PUT /abrigo/:id
 ```
 DELETE /abrigo/:id
 ```
+---
 
 ## 🎯 Objetivo do Projeto
 
 Este projeto foi desenvolvido com foco em aprendizado de Full Stack utilizando React, Sass, Node.js + Express,SQLite, Postman e boas práticas no desenvolvimento de APIs.
 
+---
 
 ## 🔐 Segurança
 
@@ -145,6 +189,7 @@ WHERE id = ?
 ```
  ✔️ Boa prática essencial em aplicações backend
 
+---
 
 ## 📚 Conceitos Aplicados
 
@@ -154,6 +199,7 @@ WHERE id = ?
 - CRUD (Create, Read, Update, Delete)
 - Arquitetura básica em camadas
 - Métodos HTTP (GET, POST, PUT, DELETE)
+---
 
 ## 👨‍💻 Autor
  #Projeto desenvolvido para fins educacionais com foco em aprendizado em Formação Full Stack - Paulo Henrique Moreira - 2026.
