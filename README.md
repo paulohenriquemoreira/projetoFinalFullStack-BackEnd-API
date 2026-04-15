@@ -1,4 +1,6 @@
-# 🚀 Desafio Final - Empower 5.0  - Em construção
+# 🚀 Desafio Final - Empower 5.0
+
+## Ênfase no Back End e na construção da API para consumo no Front End.
 
 #### Este projeto foi desenvolvido a partir de um desafio sobre enchentes no Brasil. Ao analisar o cenário, identifiquei a dificuldade relacionada à falta de informação sobre abrigos, o que motivou a criação desta solução. Tendo em vista que a organização dos abrigos agiliza tanto a localização de pessoas desaparecidas quanto o esforço voluntário e as doações, este projeto tem como pilar a organização das informações e a promoção de maior agilidade na gestão de vagas em abrigos.
 
