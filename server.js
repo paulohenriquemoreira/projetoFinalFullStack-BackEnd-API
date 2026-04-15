@@ -20,7 +20,6 @@ app.get("/", (req, res) => {
         </body>    
         
     `);
-
 });
 
 app.get("/abrigos", async (req, res) => {
@@ -68,7 +67,7 @@ app.post("/abrigos", async (req,res) => {
             aceita_doacoes,
         ],
     );
-    res.send(
+    res.json(
         `Abrigo novo registrado: ${nome_abrigo} no endereço: ${endereco_abrigo}`,
     );
 
@@ -88,7 +87,7 @@ app.put("/abrigos/:id", async (req,res) =>{
         SET vagas_disponiveis = ?
         WHERE id = ?`, [vagas_disponiveis, id],
     );
-    res.send(`O abrigo de ${id} foi atualizado com sucesso!`);
+    res.json(`O abrigo de ${id} foi atualizado com sucesso!`);
 
 });
 
@@ -103,7 +102,7 @@ app.delete("/abrigos/:id", async (req, res) => {
             DELETE FROM abrigos WHERE id = ?`, [id],
     );
 
-    res.send(`O abrigo de ${id} foi removido com sucesso!`);
+    res.json(`O abrigo de ${id} foi removido com sucesso!`);
     
 });
 
