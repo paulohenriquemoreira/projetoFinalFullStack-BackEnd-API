@@ -43,7 +43,11 @@ const criarBanco = async () => {
             (nome_abrigo, endereco_abrigo, capacidade_total, vagas_disponiveis, aceita_pet)
             VALUES 
             ("Escola Municipal Esperança", "Rua das Flores, 123 - Centro", 35, 35, "1"),
-            ("Igreja São João Batista", "Av. Brasil, 456 - Vila Nova", 20, 20, "0")
+            ("Igreja São João Batista", "Av. Brasil, 456 - Vila Nova", 20, 20, "0"),
+            ("Escola Manoel Tobias Barretos", "Av. São José, 55 - Centro", 20, 20, "1"),
+            ("Ginásio Poliesportivo Ayrosa", "Rua Ciriema, 6 - Vila Ayrosa", 20, 0, "0"),
+            ("Galpão Mãe Terra", "Rua Albert Frack, 53 - Centro", 50, 35, "1"),
+            ("Igreja Evangélica Santa Fé", "Av. Um, 46 - Jardim Roberto", 15, 0, "0")
         `);
     }
 
