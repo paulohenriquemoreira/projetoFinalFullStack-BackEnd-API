@@ -87,9 +87,63 @@ app.delete("/abrigos/:id", async (req, res) => {
   res.json({ mensagem: `Abrigo ${id} removido com sucesso!` });
 });
 
+
 // ==========================================
 // --- CRUD: PESSOAS ---
 // ==========================================
+
+//CREATE - Registrar Pessoa (Desalojada ou Desaparecida)
+app.post("/pessoas", async (req, res) => {
+  const { nome_completo, data_nascimento, endereco_residencial, id_abrigo } = req.body;
+  const db = await criarBanco();
+
+  try {
+    // 1. Verificação de duplicidade (LEFT JOIN para achar desaparecidos e abrigados)
+    const pessoaExistente = await db.get(
+        `SELECT p.*, a.nome_abrigo, a.endereco_abrigo, strftime('%d/%m/%Y %H:%M', p.data_registro) as data_formatada
+         FROM pessoas p LEFT JOIN abrigos a ON p.id_abrigo = a.id
+         WHERE p.nome_completo = ? AND p.data_nascimento = ?`,
+        [nome_completo, data_nascimento]
+    );
+
+    if (pessoaExistente) {
+        return res.status(400).json({
+            mensagem: "Pessoa já registrada no sistema!",
+            localizacao: {
+                abrigo: pessoaExistente.nome_abrigo || "Registrada como Desaparecida",
+                endereco: pessoaExistente.endereco_abrigo || "Sem abrigo vinculado",
+                data_registro: pessoaExistente.data_formatada
+            }
+        });
+    }
+
+    // 2. Verificação de Vagas CONDICIONAL (Só roda se enviar id_abrigo)
+    if (id_abrigo) {
+        const abrigo = await db.get("SELECT vagas_disponiveis FROM abrigos WHERE id = ?", [id_abrigo]);
+        if (!abrigo || abrigo.vagas_disponiveis <= 0) {
+            return res.status(400).json({ mensagem: "Abrigo inválido ou sem vagas." });
+        }
+    }
+
+    // 3. Inserção (Se id_abrigo não vier, salva como null)
+    await db.run(
+        `INSERT INTO pessoas(nome_completo, data_nascimento, endereco_residencial, id_abrigo) VALUES (?,?,?,?)`,
+        [nome_completo, data_nascimento, endereco_residencial, id_abrigo || null]
+    );
+
+    // 4. Baixa na vaga CONDICIONAL (Só roda se enviar id_abrigo)
+    if (id_abrigo) {
+        await db.run(`UPDATE abrigos SET vagas_disponiveis = vagas_disponiveis - 1 WHERE id = ?`, [id_abrigo]);
+    }
+
+    res.json({ mensagem: "Pessoa registrada com sucesso!" });
+
+  } catch (error) {
+    console.error("Erro ao registrar pessoa:", error);
+    res.status(500).json({ mensagem: "Erro interno no servidor ao tentar salvar a pessoa." });
+  }
+});
+
 
 //READ - Listar Pessoas e seus Abrigos
 app.get("/pessoas", async (req, res) => {
@@ -100,7 +154,6 @@ app.get("/pessoas", async (req, res) => {
         FROM pessoas p
         LEFT JOIN abrigos a ON p.id_abrigo = a.id
     `);
-  // Adicionado p.endereco_residencial acima para o Scroll do React funcionar!
   res.json(pessoas);
 });
 
@@ -126,15 +179,15 @@ app.delete("/pessoas/:id", async (req, res) => {
     id,
   ]);
 
-  if (pessoa) {
+  if (pessoa && pessoa.id_abrigo) {
     await db.run(
       `UPDATE abrigos SET vagas_disponiveis = vagas_disponiveis + 1 WHERE id = ?`,
       [pessoa.id_abrigo],
     );
-    await db.run(`DELETE FROM pessoas WHERE id = ?`, [id]);
   }
-
-  res.json({ mensagem: `Pessoa ${id} removida e vaga devolvida ao abrigo!` });
+  
+  await db.run(`DELETE FROM pessoas WHERE id = ?`, [id]);
+  res.json({ mensagem: `Pessoa ${id} removida com sucesso!` });
 });
 
 // Servidor
