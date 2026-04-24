@@ -32,13 +32,7 @@ app.post("/abrigos", async (req, res) => {
   const db = await criarBanco();
   await db.run(
     `INSERT INTO abrigos(nome_abrigo, endereco_abrigo, capacidade_total, vagas_disponiveis, aceita_pet) VALUES (?,?,?,?,?)`,
-    [
-      nome_abrigo,
-      endereco_abrigo,
-      capacidade_total,
-      vagas_disponiveis,
-      aceita_pet,
-    ],
+    [nome_abrigo, endereco_abrigo, capacidade_total, vagas_disponiveis, aceita_pet],
   );
   res.json({ mensagem: `Abrigo ${nome_abrigo} registrado com sucesso!` });
 });
@@ -67,14 +61,7 @@ app.put("/abrigos/:id", async (req, res) => {
   const db = await criarBanco();
   await db.run(
     `UPDATE abrigos SET nome_abrigo=?, endereco_abrigo=?, capacidade_total=?, vagas_disponiveis=?, aceita_pet=? WHERE id=?`,
-    [
-      nome_abrigo,
-      endereco_abrigo,
-      capacidade_total,
-      vagas_disponiveis,
-      aceita_pet,
-      id,
-    ],
+    [nome_abrigo, endereco_abrigo, capacidade_total, vagas_disponiveis, aceita_pet, id],
   );
   res.json({ mensagem: `Abrigo ${id} atualizado com sucesso!` });
 });
@@ -87,7 +74,6 @@ app.delete("/abrigos/:id", async (req, res) => {
   res.json({ mensagem: `Abrigo ${id} removido com sucesso!` });
 });
 
-
 // ==========================================
 // --- CRUD: PESSOAS ---
 // ==========================================
@@ -98,7 +84,6 @@ app.post("/pessoas", async (req, res) => {
   const db = await criarBanco();
 
   try {
-    // 1. Verificação de duplicidade (LEFT JOIN para achar desaparecidos e abrigados)
     const pessoaExistente = await db.get(
         `SELECT p.*, a.nome_abrigo, a.endereco_abrigo, strftime('%d/%m/%Y %H:%M', p.data_registro) as data_formatada
          FROM pessoas p LEFT JOIN abrigos a ON p.id_abrigo = a.id
@@ -117,7 +102,6 @@ app.post("/pessoas", async (req, res) => {
         });
     }
 
-    // 2. Verificação de Vagas CONDICIONAL (Só roda se enviar id_abrigo)
     if (id_abrigo) {
         const abrigo = await db.get("SELECT vagas_disponiveis FROM abrigos WHERE id = ?", [id_abrigo]);
         if (!abrigo || abrigo.vagas_disponiveis <= 0) {
@@ -125,25 +109,21 @@ app.post("/pessoas", async (req, res) => {
         }
     }
 
-    // 3. Inserção (Se id_abrigo não vier, salva como null)
     await db.run(
         `INSERT INTO pessoas(nome_completo, data_nascimento, endereco_residencial, id_abrigo) VALUES (?,?,?,?)`,
         [nome_completo, data_nascimento, endereco_residencial, id_abrigo || null]
     );
 
-    // 4. Baixa na vaga CONDICIONAL (Só roda se enviar id_abrigo)
     if (id_abrigo) {
         await db.run(`UPDATE abrigos SET vagas_disponiveis = vagas_disponiveis - 1 WHERE id = ?`, [id_abrigo]);
     }
 
     res.json({ mensagem: "Pessoa registrada com sucesso!" });
-
   } catch (error) {
     console.error("Erro ao registrar pessoa:", error);
-    res.status(500).json({ mensagem: "Erro interno no servidor ao tentar salvar a pessoa." });
+    res.status(500).json({ mensagem: "Erro interno no servidor." });
   }
 });
-
 
 //READ - Listar Pessoas e seus Abrigos
 app.get("/pessoas", async (req, res) => {
@@ -160,24 +140,40 @@ app.get("/pessoas", async (req, res) => {
 //UPDATE - Atualizar dados da Pessoa
 app.put("/pessoas/:id", async (req, res) => {
   const { id } = req.params;
-  const { nome_completo, data_nascimento, endereco_residencial } = req.body;
+  const { nome_completo, data_nascimento, endereco_residencial, id_abrigo } = req.body;
   const db = await criarBanco();
-  await db.run(
-    `UPDATE pessoas SET nome_completo=?, data_nascimento=?, endereco_residencial=? WHERE id=?`,
-    [nome_completo, data_nascimento, endereco_residencial, id],
-  );
-  res.json({ mensagem: `Dados da pessoa ${id} atualizados!` });
+
+  try {
+    // Verifica se a pessoa já existia e se ela TINHA um abrigo antes
+    const pessoaAntiga = await db.get(`SELECT id_abrigo FROM pessoas WHERE id = ?`, [id]);
+
+    // Se ela ERA desaparecida (id_abrigo null) e AGORA está recebendo um id_abrigo
+    if (pessoaAntiga && !pessoaAntiga.id_abrigo && id_abrigo) {
+      const abrigo = await db.get("SELECT vagas_disponiveis FROM abrigos WHERE id = ?", [id_abrigo]);
+      if (!abrigo || abrigo.vagas_disponiveis <= 0) {
+          return res.status(400).json({ mensagem: "Abrigo selecionado sem vagas disponíveis." });
+      }
+      // Abate a vaga
+      await db.run(`UPDATE abrigos SET vagas_disponiveis = vagas_disponiveis - 1 WHERE id = ?`, [id_abrigo]);
+    }
+
+    await db.run(
+      `UPDATE pessoas SET nome_completo=?, data_nascimento=?, endereco_residencial=?, id_abrigo=COALESCE(?, id_abrigo) WHERE id=?`,
+      [nome_completo, data_nascimento, endereco_residencial, id_abrigo, id],
+    );
+    res.json({ mensagem: `Dados da pessoa ${id} atualizados!` });
+  } catch (error) {
+    console.error("Erro ao atualizar pessoa:", error);
+    res.status(500).json({ mensagem: "Erro interno ao atualizar." });
+  }
 });
 
-//DELETE - Remover Pessoa (e devolver vaga ao abrigo)
+//DELETE - Remover Pessoa
 app.delete("/pessoas/:id", async (req, res) => {
   const { id } = req.params;
   const db = await criarBanco();
 
-  // Antes de deletar, pegamos o ID do abrigo para devolver a vaga
-  const pessoa = await db.get(`SELECT id_abrigo FROM pessoas WHERE id = ?`, [
-    id,
-  ]);
+  const pessoa = await db.get(`SELECT id_abrigo FROM pessoas WHERE id = ?`, [id]);
 
   if (pessoa && pessoa.id_abrigo) {
     await db.run(
@@ -190,7 +186,6 @@ app.delete("/pessoas/:id", async (req, res) => {
   res.json({ mensagem: `Pessoa ${id} removida com sucesso!` });
 });
 
-// Servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
