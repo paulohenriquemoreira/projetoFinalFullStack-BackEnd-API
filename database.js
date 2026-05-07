@@ -35,7 +35,7 @@ const criarBanco = async () => {
 
     console.log("Tabelas configuradas com sucesso!");
 
-    // Insert de abrigos (opcional, mantido do seu código)
+    // Insert de abrigos (opcional)
     const listaAbrigos = await db.get(`SELECT COUNT (*) AS total FROM abrigos`);
     if (listaAbrigos.total === 0) {
         await db.exec(`
