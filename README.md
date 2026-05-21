@@ -1,10 +1,10 @@
 # Projeto - API do Sistema de Gestão de Abrigos
 
-### Este projeto faz parte do 🚀 Desafio Final - da Formação Empower 5.0  Full Stack
-
 ## Ênfase no Back End e na construção da API para consumo no Front End.
 
 #### Este projeto foi desenvolvido a partir de um desafio sobre enchentes no Brasil. Ao analisar o cenário, identifiquei a dificuldade relacionada à falta de informação sobre abrigos, além da importância de ao registrar uma pessoa desaparecida, seja pontuado caso tenha algum individuo alojado com os mesmo dados em algum abrigo, reduzindo o tempo de busca entre partentes e a pessoa desaparecida, sendo o que motivou a criação desta solução. O pilar central é a organização das informações para agilizar a localização de pessoas desaparecidas e a gestão de vagas em tempo real.
+
+### Este projeto faz parte do 🚀 Desafio Final - da Formação Empower 5.0  Full Stack
 
 -----
 
